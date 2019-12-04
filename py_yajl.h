@@ -37,12 +37,6 @@
 #include <yajl/yajl_gen.h>
 #include "ptrstack.h"
 
-#if PY_MAJOR_VERSION >= 3
-#define IS_PYTHON3
-#define PyString_AsStringAndSize 	PyBytes_AsStringAndSize
-#define PyString_Check				PyBytes_Check
-#endif
-
 typedef struct {
     py_yajl_bytestack elements;
     py_yajl_bytestack keys;
@@ -55,7 +49,6 @@ typedef struct {
     void *_generator;
 } _YajlEncoder;
 
-#define PYARGS PyObject *self, PyObject *args, PyObject *kwargs
 enum { failure, success };
 
 #define PY_YAJL_CHUNK_SZ 64

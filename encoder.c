@@ -38,7 +38,6 @@
 
 #include "py_yajl.h"
 
-
 static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
 {
     yajl_gen handle = (yajl_gen)(self->_generator);
@@ -156,66 +155,11 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
         return yajl_gen_in_error_state;
 }
 
-yajl_alloc_funcs *y_allocs = NULL;
-/* a structure used to pass context to our printer function */
-struct StringAndUsedCount
-{
-    PyObject * str;
-    size_t used;
-};
-
-static void py_yajl_printer(void * ctx,
-                            const char * str,
-                            unsigned int len)
-{
-    struct StringAndUsedCount * sauc = (struct StringAndUsedCount *) ctx;
-    size_t newsize;
-
-    if (!sauc || !sauc->str) return;
-
-    /* resize our string if necc */
-    newsize = Py_SIZE(sauc->str);
-    while (sauc->used + len > newsize) newsize *= 2;
-    if (newsize != Py_SIZE(sauc->str)) {
-        _PyString_Resize(&(sauc->str), newsize);
-        if (!sauc->str)
-            return;
-    }
-
-    /* and append data if available */
-    if (len && str) {
-        memcpy((void *) (((PyStringObject *) sauc->str)->ob_sval + sauc->used), str, len);
-        sauc->used += len;
-    }
-}
-
-/* Efficiently allocate a python string of a fixed size containing uninitialized memory */
-static PyObject * lowLevelStringAlloc(Py_ssize_t size)
-{
-    PyStringObject * op = (PyStringObject *)PyObject_MALLOC(sizeof(PyStringObject) + size);
-    if (op) {
-        PyObject_INIT_VAR(op, &PyString_Type, size);
-        op->ob_shash = -1;
-        op->ob_sstate = SSTATE_NOT_INTERNED;
-    }
-    return (PyObject *) op;
-}
-
 PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, char* spaces)
 {
     yajl_gen generator = NULL;
     yajl_gen_status status;
-    struct StringAndUsedCount sauc;
 
-    /* initialize context for our printer function which
-     * performs low level string appending, using the python
-     * string implementation as a chunked growth buffer */
-    sauc.used = 0;
-    sauc.str = lowLevelStringAlloc(PY_YAJL_CHUNK_SZ);
-
-    //yajl_gen_config config = {0, NULL};
-    //generator = yajl_gen_alloc2(py_yajl_printer, &genconfig, NULL, (void *) &sauc);
-    //generator = yajl_gen_alloc2(py_yajl_printer, NULL, (void *) &sauc);
     generator = yajl_gen_alloc(NULL);
     if (spaces) {
         yajl_gen_config(generator, yajl_gen_beautify, 1);

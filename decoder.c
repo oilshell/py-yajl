@@ -234,7 +234,6 @@ PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen
 {
     yajl_handle parser = NULL;
     yajl_status yrc;
-    //yajl_parser_config config = { 1, 1 };
 
     if (self->elements.used > 0) {
         py_yajl_ps_free(self->elements);
@@ -246,7 +245,6 @@ PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen
     }
 
     /* callbacks, config, allocfuncs */
-    //parser = yajl_alloc(&decode_callbacks, &config, NULL, (void *)(self));
     parser = yajl_alloc(&decode_callbacks, NULL, (void *)(self));
     yrc = yajl_parse(parser, (const unsigned char *)(buffer), buflen);
     yajl_complete_parse(parser);

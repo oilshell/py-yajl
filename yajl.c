@@ -33,6 +33,8 @@
 
 #include "py_yajl.h"
 
+#define PYARGS PyObject *self, PyObject *args, PyObject *kwargs
+
 static void InitDecoder(_YajlDecoder* decoder) {
     py_yajl_ps_init(decoder->elements);
     py_yajl_ps_init(decoder->keys);
