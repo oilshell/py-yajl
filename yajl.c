@@ -34,8 +34,6 @@
 #include "py_yajl.h"
 
 static PyMethodDef yajlencoder_methods[] = {
-    {"encode", (PyCFunction)(py_yajlencoder_encode), METH_VARARGS, NULL},
-    {"default", (PyCFunction)(py_yajlencoder_default), METH_VARARGS, NULL},
     {NULL}
 };
 
@@ -182,7 +180,6 @@ static char *__config_gen_config(PyObject *indent, yajl_gen_config *config)
 
 static PyObject *py_dumps(PYARGS)
 {
-    PyObject *encoder = NULL;
     PyObject *obj = NULL;
     PyObject *result = NULL;
     PyObject *indent = NULL;
@@ -201,14 +198,8 @@ static PyObject *py_dumps(PYARGS)
     }
 #endif
 
-    encoder = PyObject_Call((PyObject *)(&YajlEncoderType), NULL, NULL);
-    if (encoder == NULL) {
-        return NULL;
-    }
-
-    // TODO pass config
-    result = _internal_encode((_YajlEncoder *)encoder, obj);
-    Py_XDECREF(encoder);
+    _YajlEncoder encoder;
+    result = _internal_encode(&encoder, obj);
 #if 0
     if (spaces) {
         free(spaces);
