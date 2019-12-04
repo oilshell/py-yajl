@@ -60,91 +60,8 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
         return yajl_gen_bool(handle, 0);
     }
     if (PyUnicode_Check(object)) {
-        Py_ssize_t length = PyUnicode_GET_SIZE(object);
-        Py_UNICODE *raw_unicode = PyUnicode_AS_UNICODE(object);
-        /*
-         * Create a buffer with enough space for code-points, preceeding and
-         * following quotes and a null termination character
-         */
-        char *buffer = (char *)(malloc(sizeof(char) * (1 + length * 6)));
-        unsigned int offset = 0;
-
-        while (length-- > 0) {
-            Py_UNICODE ch = *raw_unicode++;
-
-            /* Escape escape characters */
-            switch (ch) {
-                case '\t':
-                    buffer[offset++] = '\\';
-                    buffer[offset++] = 't';
-                    continue;
-                    break;
-                case '\n':
-                    buffer[offset++] = '\\';
-                    buffer[offset++] = 'n';
-                    continue;
-                    break;
-                case '\r':
-                    buffer[offset++] = '\\';
-                    buffer[offset++] = 'r';
-                    continue;
-                    break;
-                case '\f':
-                    buffer[offset++] = '\\';
-                    buffer[offset++] = 'f';
-                    continue;
-                    break;
-                case '\b':
-                    buffer[offset++] = '\\';
-                    buffer[offset++] = 'b';
-                    continue;
-                    break;
-                case '\\':
-                    buffer[offset++] = '\\';
-                    buffer[offset++] = '\\';
-                    continue;
-                    break;
-                case '\"':
-                    buffer[offset++] = '\\';
-                    buffer[offset++] = '\"';
-                    continue;
-                    break;
-                default:
-                    break;
-            }
-
-            /* Map 16-bit characters to '\uxxxx' */
-            if (ch >= 256) {
-                buffer[offset++] = '\\';
-                buffer[offset++] = 'u';
-                buffer[offset++] = hexdigit[(ch >> 12) & 0x000F];
-                buffer[offset++] = hexdigit[(ch >> 8) & 0x000F];
-                buffer[offset++] = hexdigit[(ch >> 4) & 0x000F];
-                buffer[offset++] = hexdigit[ch & 0x000F];
-                continue;
-            }
-
-            /* Map non-printable US ASCII to '\u00hh' */
-            if ( (ch < 0x20) || (ch >= 0x7F) ) {
-                buffer[offset++] = '\\';
-                buffer[offset++] = 'u';
-                buffer[offset++] = '0';
-                buffer[offset++] = '0';
-                buffer[offset++] = hexdigit[(ch >> 4) & 0x0F];
-                buffer[offset++] = hexdigit[ch & 0x0F];
-                continue;
-            }
-
-            /* Handle proper ascii chars */
-            if ( (ch >= 0x20) && (ch < 0x7F) ) {
-                buffer[offset++] = (char)(ch);
-                continue;
-            }
-        }
-        buffer[offset] = '\0';
-        status = yajl_gen_raw_string(handle, (const unsigned char *)(buffer), (unsigned int)(offset));
-        free(buffer);
-        return status;
+        PyErr_SetObject(PyExc_TypeError, PyUnicode_FromString("Can't serialize unicode"));
+        goto exit;
     }
 #ifdef IS_PYTHON3
     if (PyBytes_Check(object)) {
@@ -254,7 +171,7 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
     }
     else {
         PyErr_SetObject(PyExc_TypeError, PyUnicode_FromString("Not serializable to JSON"));
-            goto exit;
+        goto exit;
     }
 
     exit:
