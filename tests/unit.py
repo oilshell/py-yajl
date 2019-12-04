@@ -16,7 +16,7 @@ import yajl
 
 class DecoderBase(unittest.TestCase):
     def decode(self, json):
-        return yajl.Decoder().decode(json)
+        return yajl.loads(json)
 
     def assertDecodesTo(self, json, value):
         rc = self.decode(json)
@@ -121,14 +121,12 @@ class DumpsTest(BasicJSONEncodeTests):
         return yajl.dumps(value)
 
 class ErrorCasesTests(unittest.TestCase):
-    def setUp(self):
-        self.d = yajl.Decoder()
 
     def test_EmptyString(self):
-        self.failUnlessRaises(ValueError, self.d.decode, '')
+        self.failUnlessRaises(ValueError, yajl.loads, '')
 
     def test_None(self):
-        self.failUnlessRaises(ValueError, self.d.decode, None)
+        self.failUnlessRaises(ValueError, yajl.loads, None)
 
 
 class StreamBlockingDecodingTests(unittest.TestCase):

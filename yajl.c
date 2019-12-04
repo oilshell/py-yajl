@@ -126,9 +126,24 @@ static PyTypeObject YajlEncoderType = {
     0,                         /* tp_alloc */
 };
 
+static void InitDecoder(_YajlDecoder* decoder) {
+    py_yajl_ps_init(decoder->elements);
+    py_yajl_ps_init(decoder->keys);
+    decoder->root = NULL;
+}
+
+static void FreeDecoder(_YajlDecoder* decoder) {
+    py_yajl_ps_free(decoder->elements);
+    py_yajl_ps_init(decoder->elements);
+    py_yajl_ps_free(decoder->keys);
+    py_yajl_ps_init(decoder->keys);
+    if (decoder->root) {
+        Py_XDECREF(decoder->root);
+    }
+}
+
 static PyObject *py_loads(PYARGS)
 {
-    PyObject *decoder = NULL;
     PyObject *result = NULL;
     PyObject *pybuffer = NULL;
     char *buffer = NULL;
@@ -162,15 +177,13 @@ static PyObject *py_loads(PYARGS)
         return NULL;
     }
 
-    decoder = PyObject_Call((PyObject *)(&YajlDecoderType), NULL, NULL);
-    if (decoder == NULL) {
-        return NULL;
-    }
+    _YajlDecoder decoder;
+    InitDecoder(&decoder);
 
-    result = _internal_decode(
-            (_YajlDecoder *)decoder, buffer, (unsigned int)buflen);
+    result = _internal_decode(&decoder, buffer, (unsigned int)buflen);
+
+    FreeDecoder(&decoder);
     Py_DECREF(pybuffer);
-    Py_XDECREF(decoder);
     return result;
 }
 
@@ -253,7 +266,6 @@ static PyObject *py_dumps(PYARGS)
 static PyObject *__read = NULL;
 static PyObject *_internal_stream_load(PyObject *args, unsigned int blocking)
 {
-    PyObject *decoder = NULL;
     PyObject *stream = NULL;
     PyObject *buffer = NULL;
     PyObject *result = NULL;
@@ -275,14 +287,12 @@ static PyObject *_internal_stream_load(PyObject *args, unsigned int blocking)
     if (!buffer)
         return NULL;
 
-    decoder = PyObject_Call((PyObject *)(&YajlDecoderType), NULL, NULL);
-    if (decoder == NULL) {
-        return NULL;
-    }
+    _YajlDecoder decoder;
+    InitDecoder(&decoder);
 
-    result = _internal_decode((_YajlDecoder *)decoder, PyString_AsString(buffer),
-                  PyString_Size(buffer));
-    Py_XDECREF(decoder);
+    result = _internal_decode(&decoder, PyString_AsString(buffer),
+                              PyString_Size(buffer));
+    FreeDecoder(&decoder);
     Py_XDECREF(buffer);
     return result;
 
@@ -434,14 +444,6 @@ yajl.dumps():\t\t681.0221ms"
 
     PyObject *version = PyUnicode_FromString(MOD_VERSION);
     PyModule_AddObject(module, "__version__", version);
-
-    YajlDecoderType.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&YajlDecoderType) < 0) {
-        goto bad_exit;
-    }
-
-    Py_INCREF(&YajlDecoderType);
-    PyModule_AddObject(module, "Decoder", (PyObject *)(&YajlDecoderType));
 
     YajlEncoderType.tp_new = PyType_GenericNew;
     if (PyType_Ready(&YajlEncoderType) < 0) {
