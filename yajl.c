@@ -94,71 +94,36 @@ static PyObject *py_loads(PYARGS)
     return result;
 }
 
-#if 0
-static char *__config_gen_config(PyObject *indent, yajl_gen_config *config)
-{
-    long indentLevel = -1;
-    char *spaces = NULL;
-
-    if (!indent)
-        return NULL;
-
-    if ((indent != Py_None) && (!PyLong_Check(indent))
-#ifndef IS_PYTHON3
-            && (!PyInt_Check(indent))
-#endif
-    ) {
-        PyErr_SetObject(PyExc_TypeError,
-                PyUnicode_FromString("`indent` must be int or None"));
-        return NULL;
-    }
-
-    if (indent != Py_None) {
-        indentLevel = PyLong_AsLong(indent);
-
-        if (indentLevel >= 0) {
-            config->beautify = 1;
-            if (indentLevel == 0) {
-                config->indentString = "";
-            }
-            else {
-                spaces = (char *)(malloc(sizeof(char) * (indentLevel + 1)));
-                memset((void *)(spaces), (int)' ', indentLevel);
-                spaces[indentLevel] = '\0';
-                config->indentString = spaces;
-            }
-        }
-    }
+const char* IndentString(int n) {
+    char* spaces = (char *)(malloc(n + 1));
+    memset(spaces, ' ', n);
+    spaces[n] = '\0';
     return spaces;
 }
-#endif
 
 static PyObject *py_dumps(PYARGS)
 {
     PyObject *obj = NULL;
     PyObject *result = NULL;
     static char *kwlist[] = {"object", "indent", NULL};
-    char *spaces = NULL;
 
-    int indent;
+    int indent = 0;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|i", kwlist, &obj, &indent)) {
         return NULL;
     }
 
-#if 0
-    spaces = __config_gen_config(indent, &config);
-    if (PyErr_Occurred()) {
-        return NULL;
+    char* spaces = NULL;
+    if (indent > 0) {
+        spaces = IndentString(indent);
     }
-#endif
 
     _YajlEncoder encoder;
     result = _internal_encode(&encoder, obj);
-#if 0
+
     if (spaces) {
         free(spaces);
     }
-#endif
+
     return result;
 }
 
@@ -240,25 +205,22 @@ static PyObject *py_dump(PYARGS)
     PyObject *stream = NULL;
     PyObject *result = NULL;
     static char *kwlist[] = {"object", "stream", "indent", NULL};
-    char *spaces = NULL;
 
-    int indent;
+    int indent = 0;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|i", kwlist, &object, &stream, &indent)) {
         return NULL;
     }
 
-#if 0
-    spaces = __config_gen_config(indent, &config);
-    if (PyErr_Occurred()) {
-        return NULL;
+    char* spaces = NULL;
+    if (indent > 0) {
+        spaces = IndentString(indent);
     }
-#endif
+
     result = _internal_stream_dump(object, stream, 0);
-#if 0
+
     if (spaces) {
         free(spaces);
     }
-#endif
     return result;
 }
 
