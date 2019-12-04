@@ -44,12 +44,9 @@
 #endif
 
 typedef struct {
-    PyObject_HEAD
-
     py_yajl_bytestack elements;
     py_yajl_bytestack keys;
     PyObject *root;
-
 } _YajlDecoder;
 
 typedef struct {
@@ -88,9 +85,6 @@ enum { failure, success };
 /*
  * Methods defined for the YajlDecoder type in decoder.c
  */
-extern PyObject *py_yajldecoder_decode(PYARGS);
-extern int yajldecoder_init(PYARGS);
-extern void yajldecoder_dealloc(_YajlDecoder *self);
 extern PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen);
 
 
