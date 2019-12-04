@@ -54,7 +54,9 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
         return yajl_gen_bool(handle, 0);
     }
     if (PyUnicode_Check(object)) {
-        PyErr_SetObject(PyExc_TypeError, PyUnicode_FromString("Can't serialize unicode"));
+        /* Oil doesn't have unicode objects, so this should never happen */
+        PyErr_SetObject(PyExc_TypeError,
+            PyUnicode_FromString("Unexpected unicode object"));
         goto exit;
     }
     if (PyString_Check(object)) {
@@ -122,15 +124,10 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
         while (PyDict_Next(object, &position, &key, &value)) {
             PyObject *newKey = key;
 
-            if ( (PyFloat_Check(key)) ||
-                (PyLong_Check(key)) ) {
-
-                /*
-                 * Performing the conversion separately for Python 2
-                 * and Python 3 to ensure we consistently generate
-                 * unicode strings in both versions
-                 */
-                newKey = PyObject_Unicode(key);
+            if (!PyString_Check(key)) {
+              PyErr_SetObject(PyExc_TypeError,
+                  PyUnicode_FromString("JSON object keys must be strings"));
+              goto exit;
             }
 
             status = ProcessObject(self, newKey);
@@ -147,7 +144,8 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
         return yajl_gen_map_close(handle);
     }
     else {
-        PyErr_SetObject(PyExc_TypeError, PyUnicode_FromString("Not serializable to JSON"));
+        PyErr_SetObject(PyExc_TypeError,
+            PyUnicode_FromString("Unexpected type of object"));
         goto exit;
     }
 
@@ -181,6 +179,11 @@ PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, char* spaces)
 
     yajl_gen_free(generator);
     self->_generator = NULL;
+
+    if (status != yajl_gen_status_ok) {
+        assert(PyErr_Occurred());
+        return NULL;
+    }
 
     return result;
 }

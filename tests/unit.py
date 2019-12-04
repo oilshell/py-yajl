@@ -244,32 +244,21 @@ class IssueNineTest(unittest.TestCase):
         self.failUnlessRaises(TypeError, yajl.dumps, set([2,3]))
 
 
-# TODO: These should raise execptions and not return "{".
-
 class IssueTenTest(unittest.TestCase):
     def testInt(self):
         ''' http://github.com/rtyler/py-yajl/issues#issue/10 '''
-        return
         data = {1 : 2}
-        j = yajl.dumps(data)
-        result = yajl.loads(j)
-        self.assertEquals({'1': 2}, result)
+        self.assertRaises(TypeError, yajl.dumps, data)
 
     def testFloat(self):
         ''' http://github.com/rtyler/py-yajl/issues#issue/10 '''
-        return
         data = {1.2 : 2}
-        j = yajl.dumps(data)
-        result = yajl.loads(j)
-        self.assertEquals({'1.2': 2}, result)
+        self.assertRaises(TypeError, yajl.dumps, data)
 
     def testLong(self):
         ''' http://github.com/rtyler/py-yajl/issues#issue/10 '''
-        return
         data = {long(1) : 2}
-        j = yajl.dumps(data)
-        result = yajl.loads(j)
-        self.assertEquals({'1': 2}, result)
+        self.assertRaises(TypeError, yajl.dumps, data)
 
 class IssueTwelveTest(unittest.TestCase):
     def runTest(self):
