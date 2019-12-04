@@ -262,24 +262,6 @@ static PyObject *py_dump(PYARGS)
     return result;
 }
 
-static PyObject *py_monkeypatch(PYARGS)
-{
-    PyObject *sys = PyImport_ImportModule("sys");
-    PyObject *modules = PyObject_GetAttrString(sys, "modules");
-    PyObject *yajl = PyDict_GetItemString(modules, "yajl");
-
-    if (!yajl) {
-        return Py_False;
-    }
-
-    PyDict_SetItemString(modules, "json_old", PyDict_GetItemString(modules, "json"));
-    PyDict_SetItemString(modules, "json", yajl);
-
-    Py_XDECREF(sys);
-    Py_XDECREF(modules);
-    return Py_True;
-}
-
 static struct PyMethodDef yajl_methods[] = {
     {"dumps", (PyCFunctionWithKeywords)(py_dumps), METH_VARARGS | METH_KEYWORDS,
 "yajl.dumps(obj [, indent=None])\n\n\
@@ -306,13 +288,6 @@ If `indent` is a non-negative integer, then JSON array elements \n\
 and object members will be pretty-printed with that indent level. \n\
 An indent level of 0 will only insert newlines. None (the default) \n\
 selects the most compact representation.\n\
-"},
-    /*
-     {"iterload", (PyCFunction)(py_iterload), METH_VARARGS, NULL},
-     */
-    {"monkeypatch", (PyCFunction)(py_monkeypatch), METH_NOARGS,
-"yajl.monkeypatch()\n\n\
-Monkey-patches the yajl module into sys.modules as \"json\"\n\
 "},
     {NULL}
 };

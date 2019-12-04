@@ -298,18 +298,6 @@ class IssueTwelveTest(unittest.TestCase):
             from tests import python2
             self.assertEquals(yajl.dumps(python2.IssueTwelveTest_dict), '{"a":"b","c":"d"}')
 
-class IssueThirteenTest(unittest.TestCase):
-    def runTest(self):
-        try:
-            import json
-        except ImportError:
-            # Skip the test on 2.4/2.5
-            return
-
-        rc = yajl.monkeypatch()
-        self.assertTrue(rc)
-        self.assertEquals(sys.modules['json'], sys.modules['yajl'])
-
 
 class IssueSixteenTest(unittest.TestCase):
     def runTest(self):
