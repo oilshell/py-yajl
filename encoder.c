@@ -303,21 +303,3 @@ PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj)
 
 #endif
 }
-
-int yajlencoder_init(PYARGS)
-{
-    _YajlEncoder *me = (_YajlEncoder *)(self);
-
-    if (!me)
-        return 1;
-    return 0;
-}
-
-void yajlencoder_dealloc(_YajlEncoder *self)
-{
-#ifdef IS_PYTHON3
-    Py_TYPE(self)->tp_free((PyObject*)self);
-#else
-    self->ob_type->tp_free((PyObject*)self);
-#endif
-}

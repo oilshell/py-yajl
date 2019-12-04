@@ -33,51 +33,6 @@
 
 #include "py_yajl.h"
 
-static PyMethodDef yajlencoder_methods[] = {
-    {NULL}
-};
-
-static PyTypeObject YajlEncoderType = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
-    "yajl.YajlEncoder",        /*tp_name*/
-    sizeof(_YajlEncoder),      /*tp_basicsize*/
-    0,                         /*tp_itemsize*/
-    (destructor)yajlencoder_dealloc,       /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,                         /*tp_compare*/
-    0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,        /*tp_flags*/
-    "Yajl-based encoder",      /* tp_doc */
-    0,                     /* tp_traverse */
-    0,                     /* tp_clear */
-    0,                     /* tp_richcompare */
-    0,                     /* tp_weaklistoffset */
-    0,                     /* tp_iter */
-    0,                     /* tp_iternext */
-    yajlencoder_methods,  /* tp_methods */
-    NULL,                 /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
-    0,                         /* tp_dictoffset */
-    (initproc)(yajlencoder_init),/* tp_init */
-    0,                         /* tp_alloc */
-};
-
 static void InitDecoder(_YajlDecoder* decoder) {
     py_yajl_ps_init(decoder->elements);
     py_yajl_ps_init(decoder->keys);
@@ -183,7 +138,6 @@ static PyObject *py_dumps(PYARGS)
     PyObject *obj = NULL;
     PyObject *result = NULL;
     PyObject *indent = NULL;
-    //yajl_gen_config config = { 0, NULL };
     static char *kwlist[] = {"object", "indent", NULL};
     char *spaces = NULL;
 
@@ -259,7 +213,6 @@ static PyObject *__write = NULL;
 static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsigned int blocking)
             
 {
-    PyObject *encoder = NULL;
     PyObject *buffer = NULL;
 
     if (__write == NULL) {
@@ -270,14 +223,9 @@ static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsig
         goto bad_type;
     }
 
-    encoder = PyObject_Call((PyObject *)(&YajlEncoderType), NULL, NULL);
-    if (encoder == NULL) {
-        return NULL;
-    }
-
-    buffer = _internal_encode((_YajlEncoder *)encoder, object);
+    _YajlEncoder encoder;
+    buffer = _internal_encode(&encoder, object);
     PyObject_CallMethodObjArgs(stream, __write, buffer, NULL);
-    Py_XDECREF(encoder);
     Py_XDECREF(buffer);
     return Py_True;
 
@@ -389,14 +337,6 @@ yajl.dumps():\t\t681.0221ms"
 
     PyObject *version = PyUnicode_FromString(MOD_VERSION);
     PyModule_AddObject(module, "__version__", version);
-
-    YajlEncoderType.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&YajlEncoderType) < 0) {
-        goto bad_exit;
-    }
-
-    Py_INCREF(&YajlEncoderType);
-    PyModule_AddObject(module, "Encoder", (PyObject *)(&YajlEncoderType));
 
 bad_exit:
     return;
