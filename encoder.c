@@ -38,7 +38,6 @@
 
 #include "py_yajl.h"
 
-static const char *hexdigit = "0123456789abcdef";
 
 static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
 {
