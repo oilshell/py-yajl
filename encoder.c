@@ -326,7 +326,7 @@ static PyObject * lowLevelStringAlloc(Py_ssize_t size)
     return (PyObject *) op;
 }
 
-PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, yajl_gen_config genconfig)
+PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj)
 {
     yajl_gen generator = NULL;
     yajl_gen_status status;
@@ -341,15 +341,30 @@ PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, yajl_gen_config ge
     sauc.used = 0;
     sauc.str = lowLevelStringAlloc(PY_YAJL_CHUNK_SZ);
 
-    generator = yajl_gen_alloc2(py_yajl_printer, &genconfig, NULL, (void *) &sauc);
+    //yajl_gen_config config = {0, NULL};
+    //generator = yajl_gen_alloc2(py_yajl_printer, &genconfig, NULL, (void *) &sauc);
+    //generator = yajl_gen_alloc2(py_yajl_printer, NULL, (void *) &sauc);
+    generator = yajl_gen_alloc(NULL);
 
     self->_generator = generator;
 
     status = ProcessObject(self, obj);
 
+    // Oil patch: usage copied from json_reformat.c
+    const unsigned char * buf;
+    size_t len;
+    yajl_gen_get_buf(generator, &buf, &len);
+    PyObject* result = PyString_FromStringAndSize(buf, len);
+
+    //fwrite(buf, 1, len, stdout);
+    yajl_gen_clear(generator);
+
     yajl_gen_free(generator);
     self->_generator = NULL;
 
+    return result;
+
+#if 0
     /* if resize failed inside our printer function we'll have a null sauc.str */
     if (!sauc.str) {
         PyErr_SetObject(PyExc_ValueError, PyUnicode_FromString("Allocation failure"));
@@ -378,6 +393,8 @@ PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, yajl_gen_config ge
     _PyString_Resize(&sauc.str, sauc.used);
     return sauc.str;
 #endif
+
+#endif
 }
 
 PyObject *py_yajlencoder_default(PYARGS)
@@ -392,12 +409,11 @@ PyObject *py_yajlencoder_default(PYARGS)
 PyObject *py_yajlencoder_encode(PYARGS)
 {
     _YajlEncoder *encoder = (_YajlEncoder *)(self);
-    yajl_gen_config config = {0, NULL};
     PyObject *value;
 
     if (!PyArg_ParseTuple(args, "O", &value))
         return NULL;
-    return _internal_encode(encoder, value, config);
+    return _internal_encode(encoder, value);
 }
 
 int yajlencoder_init(PYARGS)

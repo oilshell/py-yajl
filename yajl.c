@@ -182,6 +182,7 @@ static PyObject *py_loads(PYARGS)
     return result;
 }
 
+#if 0
 static char *__config_gen_config(PyObject *indent, yajl_gen_config *config)
 {
     long indentLevel = -1;
@@ -218,6 +219,7 @@ static char *__config_gen_config(PyObject *indent, yajl_gen_config *config)
     }
     return spaces;
 }
+#endif
 
 static PyObject *py_dumps(PYARGS)
 {
@@ -225,7 +227,7 @@ static PyObject *py_dumps(PYARGS)
     PyObject *obj = NULL;
     PyObject *result = NULL;
     PyObject *indent = NULL;
-    yajl_gen_config config = { 0, NULL };
+    //yajl_gen_config config = { 0, NULL };
     static char *kwlist[] = {"object", "indent", NULL};
     char *spaces = NULL;
 
@@ -233,21 +235,26 @@ static PyObject *py_dumps(PYARGS)
         return NULL;
     }
 
+#if 0
     spaces = __config_gen_config(indent, &config);
     if (PyErr_Occurred()) {
         return NULL;
     }
+#endif
 
     encoder = PyObject_Call((PyObject *)(&YajlEncoderType), NULL, NULL);
     if (encoder == NULL) {
         return NULL;
     }
 
-    result = _internal_encode((_YajlEncoder *)encoder, obj, config);
+    // TODO pass config
+    result = _internal_encode((_YajlEncoder *)encoder, obj);
     Py_XDECREF(encoder);
+#if 0
     if (spaces) {
         free(spaces);
     }
+#endif
     return result;
 }
 
@@ -317,8 +324,8 @@ static PyObject *py_iterload(PYARGS)
 }
 
 static PyObject *__write = NULL;
-static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsigned int blocking,
-            yajl_gen_config config)
+static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsigned int blocking)
+            
 {
     PyObject *encoder = NULL;
     PyObject *buffer = NULL;
@@ -336,7 +343,7 @@ static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsig
         return NULL;
     }
 
-    buffer = _internal_encode((_YajlEncoder *)encoder, object, config);
+    buffer = _internal_encode((_YajlEncoder *)encoder, object);
     PyObject_CallMethodObjArgs(stream, __write, buffer, NULL);
     Py_XDECREF(encoder);
     Py_XDECREF(buffer);
@@ -353,7 +360,6 @@ static PyObject *py_dump(PYARGS)
     PyObject *indent = NULL;
     PyObject *stream = NULL;
     PyObject *result = NULL;
-    yajl_gen_config config = { 0, NULL };
     static char *kwlist[] = {"object", "stream", "indent", NULL};
     char *spaces = NULL;
 
@@ -361,14 +367,18 @@ static PyObject *py_dump(PYARGS)
         return NULL;
     }
 
+#if 0
     spaces = __config_gen_config(indent, &config);
     if (PyErr_Occurred()) {
         return NULL;
     }
-    result = _internal_stream_dump(object, stream, 0, config);
+#endif
+    result = _internal_stream_dump(object, stream, 0);
+#if 0
     if (spaces) {
         free(spaces);
     }
+#endif
     return result;
 }
 
