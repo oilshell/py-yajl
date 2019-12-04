@@ -61,7 +61,7 @@ class BasicJSONDecodeTests(DecoderBase):
 
 class EncoderBase(unittest.TestCase):
     def encode(self, value):
-        return yajl.Encoder().encode(value)
+        return yajl.dumps(value)
 
     def assertEncodesTo(self, value, json):
         rc = self.encode(value)
