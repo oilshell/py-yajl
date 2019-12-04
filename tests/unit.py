@@ -272,10 +272,12 @@ class IssueEightTest(unittest.TestCase):
 class IssueNineTest(unittest.TestCase):
     def testListOfSets(self):
         ''' http://github.com/rtyler/py-yajl/issues#issue/9 '''
+        # TODO: Should be fixed
         self.failUnlessRaises(TypeError, yajl.dumps, [set([2,3])])
 
     def testSets(self):
         ''' http://github.com/rtyler/py-yajl/issues#issue/9 '''
+        # TODO: Should be fixed
         self.failUnlessRaises(TypeError, yajl.dumps, set([2,3]))
 
 

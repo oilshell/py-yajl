@@ -45,12 +45,8 @@ static PyMethodDef yajlencoder_methods[] = {
 };
 
 static PyTypeObject YajlDecoderType = {
-#ifdef IS_PYTHON3
-    PyVarObject_HEAD_INIT(NULL, 0)
-#else
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-#endif
     "yajl.YajlDecoder",        /*tp_name*/
     sizeof(_YajlDecoder),      /*tp_basicsize*/
     0,                         /*tp_itemsize*/
@@ -90,12 +86,8 @@ static PyTypeObject YajlDecoderType = {
 };
 
 static PyTypeObject YajlEncoderType = {
-#ifdef IS_PYTHON3
-    PyVarObject_HEAD_INIT(NULL, 0)
-#else
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-#endif
     "yajl.YajlEncoder",        /*tp_name*/
     sizeof(_YajlEncoder),      /*tp_basicsize*/
     0,                         /*tp_itemsize*/
@@ -265,9 +257,6 @@ static PyObject *_internal_stream_load(PyObject *args, unsigned int blocking)
     PyObject *stream = NULL;
     PyObject *buffer = NULL;
     PyObject *result = NULL;
-#ifdef IS_PYTHON3
-    PyObject *bufferstring = NULL;
-#endif
 
     if (!PyArg_ParseTuple(args, "O", &stream)) {
         goto bad_type;
@@ -286,25 +275,13 @@ static PyObject *_internal_stream_load(PyObject *args, unsigned int blocking)
     if (!buffer)
         return NULL;
 
-#ifdef IS_PYTHON3
-    bufferstring = PyUnicode_AsUTF8String(buffer);
-    if (!bufferstring)
-        return NULL;
-#endif
-
     decoder = PyObject_Call((PyObject *)(&YajlDecoderType), NULL, NULL);
     if (decoder == NULL) {
         return NULL;
     }
 
-#ifdef IS_PYTHON3
-    result = _internal_decode((_YajlDecoder *)decoder, PyBytes_AsString(bufferstring),
-                PyBytes_Size(bufferstring));
-    Py_XDECREF(bufferstring);
-#else
     result = _internal_decode((_YajlDecoder *)decoder, PyString_AsString(buffer),
                   PyString_Size(buffer));
-#endif
     Py_XDECREF(decoder);
     Py_XDECREF(buffer);
     return result;
@@ -438,16 +415,10 @@ Monkey-patches the yajl module into sys.modules as \"json\"\n\
 };
 
 
-#ifdef IS_PYTHON3
-static struct PyModuleDef yajlmodule = {
-    PyModuleDef_HEAD_INIT,
-    "yajl",
-#else
 PyMODINIT_FUNC inityajl(void)
 {
 
     PyObject *module = Py_InitModule3("yajl", yajl_methods,
-#endif
 "Providing a pythonic interface to the yajl (Yet Another JSON Library) parser\n\n\
 The interface is similar to that of simplejson or jsonlib providing a consistent syntax for JSON\n\
 encoding and decoding. Unlike simplejson or jsonlib, yajl is **fast** :)\n\n\
@@ -459,16 +430,7 @@ yajl.loads():\t\t502.4572ms\n\
 json.dumps():\t\t7760.6348ms\n\
 simplejson.dumps():\t930.9748ms\n\
 yajl.dumps():\t\t681.0221ms"
-#ifdef IS_PYTHON3
-    , -1, yajl_methods, NULL, NULL, NULL, NULL
-};
-
-PyMODINIT_FUNC PyInit_yajl(void)
-{
-    PyObject *module = PyModule_Create(&yajlmodule);
-#else
 );
-#endif
 
     PyObject *version = PyUnicode_FromString(MOD_VERSION);
     PyModule_AddObject(module, "__version__", version);
@@ -489,15 +451,7 @@ PyMODINIT_FUNC PyInit_yajl(void)
     Py_INCREF(&YajlEncoderType);
     PyModule_AddObject(module, "Encoder", (PyObject *)(&YajlEncoderType));
 
-#ifdef IS_PYTHON3
-    return module;
-#endif
-
 bad_exit:
-#ifdef IS_PYTHON3
-    return NULL;
-#else
     return;
-#endif
 }
 
