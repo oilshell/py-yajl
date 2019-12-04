@@ -118,7 +118,7 @@ static PyObject *py_dumps(PYARGS)
     }
 
     _YajlEncoder encoder;
-    result = _internal_encode(&encoder, obj);
+    result = _internal_encode(&encoder, obj, spaces);
 
     if (spaces) {
         free(spaces);
@@ -175,7 +175,7 @@ static PyObject *py_iterload(PYARGS)
 }
 
 static PyObject *__write = NULL;
-static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsigned int blocking)
+static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsigned int blocking, char* spaces)
             
 {
     PyObject *buffer = NULL;
@@ -189,7 +189,7 @@ static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsig
     }
 
     _YajlEncoder encoder;
-    buffer = _internal_encode(&encoder, object);
+    buffer = _internal_encode(&encoder, object, spaces);
     PyObject_CallMethodObjArgs(stream, __write, buffer, NULL);
     Py_XDECREF(buffer);
     return Py_True;
@@ -216,7 +216,7 @@ static PyObject *py_dump(PYARGS)
         spaces = IndentString(indent);
     }
 
-    result = _internal_stream_dump(object, stream, 0);
+    result = _internal_stream_dump(object, stream, 0, spaces);
 
     if (spaces) {
         free(spaces);

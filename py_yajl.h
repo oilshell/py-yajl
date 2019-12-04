@@ -84,7 +84,7 @@ enum { failure, success };
 
 extern PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen);
 
-extern PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj);
+extern PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, char * spaces);
 
 #endif
 

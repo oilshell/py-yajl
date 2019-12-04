@@ -233,7 +233,7 @@ static PyObject * lowLevelStringAlloc(Py_ssize_t size)
     return (PyObject *) op;
 }
 
-PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj)
+PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, char* spaces)
 {
     yajl_gen generator = NULL;
     yajl_gen_status status;
@@ -252,6 +252,10 @@ PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj)
     //generator = yajl_gen_alloc2(py_yajl_printer, &genconfig, NULL, (void *) &sauc);
     //generator = yajl_gen_alloc2(py_yajl_printer, NULL, (void *) &sauc);
     generator = yajl_gen_alloc(NULL);
+    if (spaces) {
+        yajl_gen_config(generator, yajl_gen_beautify, 1);
+        yajl_gen_config(generator, yajl_gen_indent_string, spaces);
+    }
 
     self->_generator = generator;
 
