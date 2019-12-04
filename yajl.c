@@ -107,13 +107,13 @@ static PyObject *py_dumps(PYARGS)
     PyObject *result = NULL;
     static char *kwlist[] = {"object", "indent", NULL};
 
-    int indent = 0;
+    int indent = -1;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|i", kwlist, &obj, &indent)) {
         return NULL;
     }
 
     char* spaces = NULL;
-    if (indent > 0) {
+    if (indent >= 0) {
         spaces = IndentString(indent);
     }
 
@@ -206,13 +206,13 @@ static PyObject *py_dump(PYARGS)
     PyObject *result = NULL;
     static char *kwlist[] = {"object", "stream", "indent", NULL};
 
-    int indent = 0;
+    int indent = -1;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|i", kwlist, &object, &stream, &indent)) {
         return NULL;
     }
 
     char* spaces = NULL;
-    if (indent > 0) {
+    if (indent >= 0) {
         spaces = IndentString(indent);
     }
 
