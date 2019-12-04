@@ -44,40 +44,13 @@ typedef struct {
 } _YajlDecoder;
 
 typedef struct {
-    PyObject_HEAD
-    /* type specifics */
     void *_generator;
 } _YajlEncoder;
 
 enum { failure, success };
 
-#define PY_YAJL_CHUNK_SZ 64
+PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen);
 
-/* Defining the Py_SIZE macro for 2.4/2.5 compat */
-#ifndef Py_SIZE
-#define Py_SIZE(ob)     (((PyVarObject*)(ob))->ob_size)
-#endif
-
-/* 
- * PyUnicode_FromStringAndSize isn't defined in Python 2.4/2.5; IIRC 
- * JSON strings /should/ be UTF-8 encoded, so PyUnicode_DecodeUTF8() 
- * seems like the most logical extension
- */
-#ifndef PyUnicode_FromStringAndSize
-#define PyUnicode_FromStringAndSize(a, b)  PyUnicode_DecodeUTF8(a, b, NULL)
-#endif
-#ifndef PyUnicode_FromString
-#define PyUnicode_FromString(s) PyUnicode_DecodeUTF8(s, strlen(s), NULL)
-#endif
-
-/* On Python 2.4 Py_ssize_t doesn't exist */
-#ifndef Py_ssize_t
-#define Py_ssize_t ssize_t
-#endif
-
-extern PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen);
-
-extern PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, char * spaces);
+PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, char * spaces);
 
 #endif
-
