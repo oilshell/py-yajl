@@ -58,21 +58,12 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
         PyErr_SetObject(PyExc_TypeError, PyUnicode_FromString("Can't serialize unicode"));
         goto exit;
     }
-#ifdef IS_PYTHON3
-    if (PyBytes_Check(object)) {
-#else
     if (PyString_Check(object)) {
-#endif
         const unsigned char *buffer = NULL;
         Py_ssize_t length;
-#ifdef IS_PYTHON3
-        PyBytes_AsStringAndSize(object, (char **)&buffer, &length);
-#else
         PyString_AsStringAndSize(object, (char **)&buffer, &length);
-#endif
         return yajl_gen_string(handle, buffer, (unsigned int)(length));
     }
-#ifndef IS_PYTHON3
     if (PyInt_Check(object)) {
         long number = PyInt_AsLong(object);
         if ( (number == -1) && (PyErr_Occurred()) ) {
@@ -80,7 +71,6 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
         }
         return yajl_gen_integer(handle, number);
     }
-#endif
     if (PyLong_Check(object)) {
         long long number = PyLong_AsLongLong(object);
         char *buffer = NULL;
@@ -134,9 +124,6 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
             PyObject *newKey = key;
 
             if ( (PyFloat_Check(key)) ||
-#ifndef IS_PYTHON3
-                (PyInt_Check(key)) ||
-#endif
                 (PyLong_Check(key)) ) {
 
                 /*
@@ -144,11 +131,7 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
                  * and Python 3 to ensure we consistently generate
                  * unicode strings in both versions
                  */
-#ifdef IS_PYTHON3
-                newKey = PyObject_Str(key);
-#else
                 newKey = PyObject_Unicode(key);
-#endif
             }
 
             status = ProcessObject(self, newKey);
@@ -194,22 +177,14 @@ static void py_yajl_printer(void * ctx,
     newsize = Py_SIZE(sauc->str);
     while (sauc->used + len > newsize) newsize *= 2;
     if (newsize != Py_SIZE(sauc->str)) {
-#ifdef IS_PYTHON3
-        _PyBytes_Resize(&(sauc->str), newsize);
-#else
         _PyString_Resize(&(sauc->str), newsize);
-#endif
         if (!sauc->str)
             return;
     }
 
     /* and append data if available */
     if (len && str) {
-#ifdef IS_PYTHON3
-        memcpy((void *)(((PyBytesObject *)sauc->str)->ob_sval + sauc->used), str, len);
-#else
         memcpy((void *) (((PyStringObject *) sauc->str)->ob_sval + sauc->used), str, len);
-#endif
         sauc->used += len;
     }
 }
@@ -217,19 +192,12 @@ static void py_yajl_printer(void * ctx,
 /* Efficiently allocate a python string of a fixed size containing uninitialized memory */
 static PyObject * lowLevelStringAlloc(Py_ssize_t size)
 {
-#ifdef IS_PYTHON3
-    PyBytesObject * op = (PyBytesObject *)PyObject_MALLOC(sizeof(PyBytesObject) + size);
-    if (op) {
-        PyObject_INIT_VAR(op, &PyBytes_Type, size);
-    }
-#else
     PyStringObject * op = (PyStringObject *)PyObject_MALLOC(sizeof(PyStringObject) + size);
     if (op) {
         PyObject_INIT_VAR(op, &PyString_Type, size);
         op->ob_shash = -1;
         op->ob_sstate = SSTATE_NOT_INTERNED;
     }
-#endif
     return (PyObject *) op;
 }
 
@@ -238,9 +206,6 @@ PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, char* spaces)
     yajl_gen generator = NULL;
     yajl_gen_status status;
     struct StringAndUsedCount sauc;
-#ifdef IS_PYTHON3
-    PyObject *result = NULL;
-#endif
 
     /* initialize context for our printer function which
      * performs low level string appending, using the python
@@ -274,36 +239,4 @@ PyObject *_internal_encode(_YajlEncoder *self, PyObject *obj, char* spaces)
     self->_generator = NULL;
 
     return result;
-
-#if 0
-    /* if resize failed inside our printer function we'll have a null sauc.str */
-    if (!sauc.str) {
-        PyErr_SetObject(PyExc_ValueError, PyUnicode_FromString("Allocation failure"));
-        return NULL;
-    }
-
-    if ( (status == yajl_gen_in_error_state) ||
-          (status != yajl_gen_status_ok) ) {
-        /*
-         * If we have an exception underneath the covers, let's raise that
-         * instead
-         */
-        if (!PyErr_Occurred()) {
-            PyErr_SetObject(PyExc_TypeError, PyUnicode_FromString("Object is not JSON serializable"));
-        }
-        Py_XDECREF(sauc.str);
-        return NULL;
-    }
-
-#ifdef IS_PYTHON3
-    result = PyUnicode_DecodeUTF8(((PyBytesObject *)sauc.str)->ob_sval, sauc.used, "strict");
-    Py_XDECREF(sauc.str);
-    return result;
-#else
-    /* truncate to used size, and resize will handle the null plugging */
-    _PyString_Resize(&sauc.str, sauc.used);
-    return sauc.str;
-#endif
-
-#endif
 }
