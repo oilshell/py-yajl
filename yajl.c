@@ -137,11 +137,11 @@ static PyObject *py_dumps(PYARGS)
 {
     PyObject *obj = NULL;
     PyObject *result = NULL;
-    PyObject *indent = NULL;
     static char *kwlist[] = {"object", "indent", NULL};
     char *spaces = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|O", kwlist, &obj, &indent)) {
+    int indent;
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|i", kwlist, &obj, &indent)) {
         return NULL;
     }
 
@@ -237,13 +237,13 @@ bad_type:
 static PyObject *py_dump(PYARGS)
 {
     PyObject *object = NULL;
-    PyObject *indent = NULL;
     PyObject *stream = NULL;
     PyObject *result = NULL;
     static char *kwlist[] = {"object", "stream", "indent", NULL};
     char *spaces = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|O", kwlist, &object, &stream, &indent)) {
+    int indent;
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|i", kwlist, &object, &stream, &indent)) {
         return NULL;
     }
 

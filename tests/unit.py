@@ -173,11 +173,6 @@ class DumpsOptionsTests(unittest.TestCase):
         rc = yajl.dumps({'foo' : 'bar'}, indent=-1)
         self.assertEquals(rc, '{"foo":"bar"}')
 
-    def test_none_indent(self):
-        ''' None `indent` should not result in pretty printing '''
-        rc = yajl.dumps({'foo' : 'bar'}, indent=None)
-        self.assertEquals(rc, '{"foo":"bar"}')
-
 class DumpOptionsTests(unittest.TestCase):
     stream = None
     def setUp(self):
@@ -199,11 +194,6 @@ class DumpOptionsTests(unittest.TestCase):
     def test_negative_indent(self):
         ''' Negative `indent` should not result in pretty printing '''
         rc = yajl.dump({'foo' : 'bar'}, self.stream, indent=-1)
-        self.assertEquals(self.stream.getvalue(), '{"foo":"bar"}')
-
-    def test_none_indent(self):
-        ''' None `indent` should not result in pretty printing '''
-        rc = yajl.dump({'foo' : 'bar'}, self.stream, indent=None)
         self.assertEquals(self.stream.getvalue(), '{"foo":"bar"}')
 
 class IssueSevenTest(unittest.TestCase):
