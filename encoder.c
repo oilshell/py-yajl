@@ -40,10 +40,6 @@
 
 static const char *hexdigit = "0123456789abcdef";
 
-/* Located in yajl_hacks.c */
-extern yajl_gen_status yajl_gen_raw_string(yajl_gen g,
-        const unsigned char * str, unsigned int len);
-
 static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
 {
     yajl_gen handle = (yajl_gen)(self->_generator);
