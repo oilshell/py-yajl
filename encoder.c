@@ -33,8 +33,6 @@
 
 #include <yajl/yajl_parse.h>
 #include <yajl/yajl_gen.h>
-#include <yajl_alloc.h>
-#include <yajl_buf.h>
 
 #include "py_yajl.h"
 
