@@ -55,8 +55,7 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
     }
     if (PyUnicode_Check(object)) {
         /* Oil doesn't have unicode objects, so this should never happen */
-        PyErr_SetObject(PyExc_TypeError,
-            PyUnicode_FromString("Unexpected unicode object"));
+        PyErr_SetString(PyExc_TypeError, "Unexpected unicode object");
         goto exit;
     }
     if (PyString_Check(object)) {
@@ -125,8 +124,8 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
             PyObject *newKey = key;
 
             if (!PyString_Check(key)) {
-              PyErr_SetObject(PyExc_TypeError,
-                  PyUnicode_FromString("JSON object keys must be strings"));
+              PyErr_SetString(PyExc_TypeError,
+                  "JSON object keys must be strings");
               goto exit;
             }
 
@@ -144,8 +143,7 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
         return yajl_gen_map_close(handle);
     }
     else {
-        PyErr_SetObject(PyExc_TypeError,
-            PyUnicode_FromString("Unexpected type of object"));
+        PyErr_SetString(PyExc_TypeError, "Unexpected type of object");
         goto exit;
     }
 

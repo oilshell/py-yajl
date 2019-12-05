@@ -253,14 +253,12 @@ PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen
     if (yrc != yajl_status_ok) {
         //fprintf(stderr, "YAJL ERROR %d\n", yrc);
         //fprintf(stderr, "%s\n", yajl_status_to_string(yrc));
-        PyErr_SetObject(PyExc_ValueError,
-                PyUnicode_FromString(yajl_status_to_string(yrc)));
+        PyErr_SetString(PyExc_ValueError, yajl_status_to_string(yrc));
         return NULL;
     }
 
     if (self->root == NULL) {
-        PyErr_SetObject(PyExc_ValueError,
-                PyUnicode_FromString("The root object is NULL"));
+        PyErr_SetString(PyExc_ValueError, "The root object is NULL");
         return NULL;
     }
 

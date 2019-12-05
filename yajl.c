@@ -151,7 +151,7 @@ static PyObject *_internal_stream_load(PyObject *args, unsigned int blocking)
     return result;
 
 bad_type:
-    PyErr_SetObject(PyExc_TypeError, PyUnicode_FromString("Must pass a single stream object"));
+    PyErr_SetString(PyExc_TypeError, "Must pass a single stream object");
     return NULL;
 }
 
@@ -185,7 +185,7 @@ static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsig
     return Py_True;
 
 bad_type:
-    PyErr_SetObject(PyExc_TypeError, PyUnicode_FromString("Must pass a stream object"));
+    PyErr_SetString(PyExc_TypeError, "Must pass a stream object");
     return NULL;
 }
 
@@ -262,7 +262,7 @@ simplejson.dumps():\t930.9748ms\n\
 yajl.dumps():\t\t681.0221ms"
 );
 
-    PyObject *version = PyUnicode_FromString(MOD_VERSION);
+    PyObject *version = PyString_FromString(MOD_VERSION);
     PyModule_AddObject(module, "__version__", version);
 
 bad_exit:
