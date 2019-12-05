@@ -247,7 +247,6 @@ selects the most compact representation.\n\
 
 PyMODINIT_FUNC inityajl(void)
 {
-
     PyObject *module = Py_InitModule3("yajl", yajl_methods,
 "Providing a pythonic interface to the yajl (Yet Another JSON Library) parser\n\n\
 The interface is similar to that of simplejson or jsonlib providing a consistent syntax for JSON\n\
@@ -261,11 +260,5 @@ json.dumps():\t\t7760.6348ms\n\
 simplejson.dumps():\t930.9748ms\n\
 yajl.dumps():\t\t681.0221ms"
 );
-
-    PyObject *version = PyString_FromString(MOD_VERSION);
-    PyModule_AddObject(module, "__version__", version);
-
-bad_exit:
-    return;
 }
 
