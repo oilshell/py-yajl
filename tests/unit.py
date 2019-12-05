@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 
 import os
 import sys
@@ -278,6 +279,8 @@ class StressTest(unittest.TestCase):
     """Parse all yajl testdata."""
 
     def testAll(self):
+        print('')
+
         rel_path = 'yajl/test/parsing/cases'
         cases = os.listdir(rel_path)
         for case in cases:
@@ -285,7 +288,8 @@ class StressTest(unittest.TestCase):
             # TODO: This causes SystemError!
             if case == 'deep_arrays.json':
                 continue
-            with open(os.path.join(rel_path, case)) as f:
+            path = os.path.join(rel_path, case)
+            with open(path) as f:
                 try:
                     obj = yajl.load(f)
                 except ValueError as e:
@@ -296,7 +300,9 @@ class StressTest(unittest.TestCase):
                     except OverflowError as e:
                         print('\tDUMP ERROR %s: %s' % (case, e))
                     else:
-                        print('\t%s: %d bytes' % (case, len(j)))
+                        print('\t%d bytes (%d bytes on disk)' %
+                              ( len(j), os.path.getsize(path)))
+            print('')
 
 
 if __name__ == '__main__':
