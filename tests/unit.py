@@ -4,13 +4,7 @@
 import sys
 import unittest
 
-def is_python3():
-    return sys.version_info[0] == 3
-
-if is_python3():
-    from io import StringIO
-else:
-    from StringIO import StringIO
+from cStringIO import StringIO
 
 import yajl
 
@@ -192,11 +186,9 @@ class IssueSevenTest(unittest.TestCase):
 
     def test_latin1(self):
         ''' Testing with latin-1 for http://github.com/rtyler/py-yajl/issues/#issue/7 '''
-        char = 'f\xe9in'
+        IssueSevenTest_latin1_char = u'f\xe9in'
+        char = IssueSevenTest_latin1_char
 
-        if not is_python3():
-            from tests import python2
-            char = python2.IssueSevenTest_latin1_char
         # The `json` module uses "0123456789abcdef" for its code points
         # while the yajl library uses "0123456789ABCDEF", lower()'ing
         # to make sure the resulting strings match
@@ -214,10 +206,9 @@ class IssueSevenTest(unittest.TestCase):
 
     def test_chinese(self):
         ''' Testing with simplified chinese for http://github.com/rtyler/py-yajl/issues/#issue/7 '''
-        char = '\u65e9\u5b89, \u7238\u7238'
-        if not is_python3():
-            from tests import python2
-            char = python2.IssueSevenTest_chinese_char
+        IssueSevenTest_chinese_char = u'\u65e9\u5b89, \u7238\u7238'
+        char = IssueSevenTest_chinese_char
+
         out = yajl.dumps(char).lower()
         self.assertEquals(out, '"\\u65e9\\u5b89, \\u7238\\u7238"')
 
@@ -273,9 +264,8 @@ class IssueTwelveTest(unittest.TestCase):
         normal = {'a' : 'b', 'c' : 'd'}
         self.assertEquals(yajl.dumps(normal), '{"a":"b","c":"d"}')
 
-        if not is_python3():
-            from tests import python2
-            self.assertEquals(yajl.dumps(python2.IssueTwelveTest_dict), '{"a":"b","c":"d"}')
+        IssueTwelveTest_dict = {u'a' : u'b', u'c' : u'd'}
+        self.assertEquals(yajl.dumps(IssueTwelveTest_dict), '{"a":"b","c":"d"}')
 
 
 class IssueSixteenTest(unittest.TestCase):
