@@ -184,42 +184,23 @@ class IssueSevenTest(unittest.TestCase):
         obj = yajl.loads('"f\xe9in"')
         print(obj)
 
-    def test_latin1(self):
+    def test_EncodeLatin1(self):
         ''' Testing with latin-1 for http://github.com/rtyler/py-yajl/issues/#issue/7 '''
-        IssueSevenTest_latin1_char = u'f\xe9in'
-        char = IssueSevenTest_latin1_char.encode('utf-8')
+        IssueSevenTest_latin1_char = 'f\xe9in'
+        char = IssueSevenTest_latin1_char
 
-        # The `json` module uses "0123456789abcdef" for its code points
-        # while the yajl library uses "0123456789ABCDEF", lower()'ing
-        # to make sure the resulting strings match
-        out = yajl.dumps(char).lower()
-        self.assertEquals(out, '"f\\u00e9in"')
-
-        out = yajl.dumps(out).lower()
-        self.assertEquals(out, '"\\"f\\\\u00e9in\\""')
-
-        out = yajl.loads(out)
-        self.assertEquals(out, '"f\\u00e9in"')
-
-        out = yajl.loads(out)
-        self.assertEquals(out, char)
+        j = yajl.dumps(char)
+        self.assertEqual('"f\xe9in"', j)
 
     def test_chinese(self):
         ''' Testing with simplified chinese for http://github.com/rtyler/py-yajl/issues/#issue/7 '''
         IssueSevenTest_chinese_char = u'\u65e9\u5b89, \u7238\u7238'
         char = IssueSevenTest_chinese_char.encode('utf-8')
 
-        out = yajl.dumps(char).lower()
-        self.assertEquals(out, '"\\u65e9\\u5b89, \\u7238\\u7238"')
-
-        out = yajl.dumps(out).lower()
-        self.assertEquals(out, '"\\"\\\\u65e9\\\\u5b89, \\\\u7238\\\\u7238\\""')
-
-        out = yajl.loads(out)
-        self.assertEquals(out, '"\\u65e9\\u5b89, \\u7238\\u7238"')
-
-        out = yajl.loads(out)
-        self.assertEquals(out, char)
+        # Test round trip
+        j = yajl.dumps(char)
+        s = yajl.loads(j)
+        self.assertEqual(s, char)
 
 
 class IssueEightTest(unittest.TestCase):
