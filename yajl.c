@@ -63,28 +63,16 @@ static PyObject *py_loads(PYARGS)
 
     Py_INCREF(pybuffer);
 
-    if (PyUnicode_Check(pybuffer)) {
-        if (!(result = PyUnicode_AsUTF8String(pybuffer))) {
-            Py_DECREF(pybuffer);
-            return NULL;
-        }
+    if (!PyString_Check(pybuffer)) {
         Py_DECREF(pybuffer);
-        pybuffer = result;
-        result = NULL;
-    }
-
-    if (PyString_Check(pybuffer)) {
-        if (PyString_AsStringAndSize(pybuffer, &buffer, &buflen)) {
-            Py_DECREF(pybuffer);
-            return NULL;
-        }
-    } else {
-        /* really seems like this should be a TypeError, but
-           tests/unit.py:ErrorCasesTests.test_None disagrees */
-        Py_DECREF(pybuffer);
-        PyErr_SetString(PyExc_ValueError, "string or unicode expected");
+        PyErr_SetString(PyExc_TypeError, "string expected");
         return NULL;
     }
+
+		if (PyString_AsStringAndSize(pybuffer, &buffer, &buflen)) {
+				Py_DECREF(pybuffer);
+				return NULL;
+		}
 
     _YajlDecoder decoder;
     InitDecoder(&decoder);

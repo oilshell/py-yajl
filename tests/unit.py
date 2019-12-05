@@ -109,7 +109,7 @@ class ErrorCasesTests(unittest.TestCase):
         self.failUnlessRaises(ValueError, yajl.loads, '')
 
     def test_None(self):
-        self.failUnlessRaises(ValueError, yajl.loads, None)
+        self.failUnlessRaises(TypeError, yajl.loads, None)
 
 
 class StreamBlockingDecodingTests(unittest.TestCase):
@@ -189,6 +189,7 @@ class IssueSevenTest(unittest.TestCase):
         IssueSevenTest_latin1_char = 'f\xe9in'
         char = IssueSevenTest_latin1_char
 
+        # We don't validate on encode
         j = yajl.dumps(char)
         self.assertEqual('"f\xe9in"', j)
 
@@ -265,9 +266,11 @@ class IssueTwentySevenTest(unittest.TestCase):
     "https://github.com/rtyler/py-yajl/issues/27"
     def runTest(self):
         u = u'[{"data":"Podstawow\u0105 opiek\u0119 zdrowotn\u0105"}]'
-        self.assertEqual(
-                yajl.dumps(yajl.loads(u)),
-                '[{"data":"Podstawow\\u0105 opiek\\u0119 zdrowotn\\u0105"}]')
+        self.assertRaises(TypeError, yajl.loads, u)
+        b = u.encode('utf-8')
+
+        # Round trip test
+        self.assertEqual(yajl.dumps(yajl.loads(b)), b)
 
 
 if __name__ == '__main__':
