@@ -129,7 +129,7 @@ static int handle_number(void *ctx, const char *value, unsigned int length)
 
 static int handle_string(void *ctx, const unsigned char *value, unsigned int length)
 {
-    return PlaceObject(ctx, PyUnicode_FromStringAndSize((char *)value, length));
+    return PlaceObject(ctx, PyString_FromStringAndSize((char *)value, length));
 }
 
 static int handle_start_dict(void *ctx)
@@ -144,7 +144,7 @@ static int handle_start_dict(void *ctx)
 
 static int handle_dict_key(void *ctx, const unsigned char *value, unsigned int length)
 {
-    PyObject *object = PyUnicode_FromStringAndSize((const char *) value, length);
+    PyObject *object = PyString_FromStringAndSize((const char *) value, length);
 
     if (object == NULL)
         return failure;

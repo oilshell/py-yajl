@@ -187,7 +187,7 @@ class IssueSevenTest(unittest.TestCase):
     def test_latin1(self):
         ''' Testing with latin-1 for http://github.com/rtyler/py-yajl/issues/#issue/7 '''
         IssueSevenTest_latin1_char = u'f\xe9in'
-        char = IssueSevenTest_latin1_char
+        char = IssueSevenTest_latin1_char.encode('utf-8')
 
         # The `json` module uses "0123456789abcdef" for its code points
         # while the yajl library uses "0123456789ABCDEF", lower()'ing
@@ -207,7 +207,7 @@ class IssueSevenTest(unittest.TestCase):
     def test_chinese(self):
         ''' Testing with simplified chinese for http://github.com/rtyler/py-yajl/issues/#issue/7 '''
         IssueSevenTest_chinese_char = u'\u65e9\u5b89, \u7238\u7238'
-        char = IssueSevenTest_chinese_char
+        char = IssueSevenTest_chinese_char.encode('utf-8')
 
         out = yajl.dumps(char).lower()
         self.assertEquals(out, '"\\u65e9\\u5b89, \\u7238\\u7238"')
@@ -264,6 +264,8 @@ class IssueTwelveTest(unittest.TestCase):
         normal = {'a' : 'b', 'c' : 'd'}
         self.assertEquals(yajl.dumps(normal), '{"a":"b","c":"d"}')
 
+        # Not applicable in Oil
+        return
         IssueTwelveTest_dict = {u'a' : u'b', u'c' : u'd'}
         self.assertEquals(yajl.dumps(IssueTwelveTest_dict), '{"a":"b","c":"d"}')
 
