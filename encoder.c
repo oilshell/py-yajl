@@ -53,11 +53,13 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
     if (object == Py_False) {
         return yajl_gen_bool(handle, 0);
     }
+#if 0
     if (PyUnicode_Check(object)) {
         /* Oil doesn't have unicode objects, so this should never happen */
         PyErr_SetString(PyExc_TypeError, "Unexpected unicode object");
         goto exit;
     }
+#endif
     if (PyString_Check(object)) {
         const unsigned char *buffer = NULL;
         Py_ssize_t length;

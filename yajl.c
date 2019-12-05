@@ -129,7 +129,7 @@ static PyObject *_internal_stream_load(PyObject *args, unsigned int blocking)
     }
 
     if (__read == NULL) {
-        __read = PyUnicode_FromString("read");
+        __read = PyString_FromString("read");
     }
 
     if (!PyObject_HasAttr(stream, __read)) {
@@ -171,7 +171,7 @@ static PyObject *_internal_stream_dump(PyObject *object, PyObject *stream, unsig
     PyObject *buffer = NULL;
 
     if (__write == NULL) {
-        __write = PyUnicode_FromString("write");
+        __write = PyString_FromString("write");
     }
 
     if (!PyObject_HasAttr(stream, __write)) {
