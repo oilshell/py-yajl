@@ -1,6 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import unittest
 
@@ -273,14 +274,30 @@ class IssueTwentySevenTest(unittest.TestCase):
         self.assertEqual(yajl.dumps(yajl.loads(b)), b)
 
 
-if __name__ == '__main__':
-    verbosity = '-v' in sys.argv and 2 or 1
-    runner = unittest.TextTestRunner(verbosity=verbosity)
-    if 'xml' in sys.argv:
-        import xmlrunner
-        runner = xmlrunner.XMLTestRunner(filename='Yajl-Tests.xml')
-        suites = unittest.findTestCases(sys.modules[__name__])
-        results = runner.run(unittest.TestSuite(suites))
-    else:
-        unittest.main()
+class StressTest(unittest.TestCase):
+    """Parse all yajl testdata."""
 
+    def testAll(self):
+        rel_path = 'yajl/test/parsing/cases'
+        cases = os.listdir(rel_path)
+        for case in cases:
+            print(case)
+            # TODO: This causes SystemError!
+            if case == 'deep_arrays.json':
+                continue
+            with open(os.path.join(rel_path, case)) as f:
+                try:
+                    obj = yajl.load(f)
+                except ValueError as e:
+                    print('\t%s: %s' % (case, e))
+                else:
+                    try:
+                        j = yajl.dumps(obj)
+                    except OverflowError as e:
+                        print('\tDUMP ERROR %s: %s' % (case, e))
+                    else:
+                        print('\t%s: %d bytes' % (case, len(j)))
+
+
+if __name__ == '__main__':
+    unittest.main()
