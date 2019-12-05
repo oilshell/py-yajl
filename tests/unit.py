@@ -106,7 +106,7 @@ class BasicJSONEncodeTests(EncoderBase):
     def test_class(self):
         class Bad(object):
             pass
-        self.assertRaises(ValueError, yajl.dumps, Bad)
+        self.assertRaises(TypeError, yajl.dumps, Bad)
 
 
 class ErrorCasesTests(unittest.TestCase):
@@ -183,9 +183,17 @@ class DumpOptionsTests(unittest.TestCase):
         self.assertEquals(self.stream.getvalue(), '{"foo":"bar"}')
 
 class IssueSevenTest(unittest.TestCase):
+
+    def test_DecodeLatin1(self):
+        # TODO: could expose dont_validate option from yajl
+        return
+        obj = yajl.loads('"f\xe9in"')
+        print(obj)
+
     def test_latin1(self):
         ''' Testing with latin-1 for http://github.com/rtyler/py-yajl/issues/#issue/7 '''
         char = 'f\xe9in'
+
         if not is_python3():
             from tests import python2
             char = python2.IssueSevenTest_latin1_char
