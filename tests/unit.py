@@ -284,6 +284,8 @@ class StressTest(unittest.TestCase):
         rel_path = 'yajl/test/parsing/cases'
         cases = os.listdir(rel_path)
         for case in cases:
+            if not case.endswith('.json'):
+                continue
             print(case)
             # TODO: This causes SystemError!
             if case == 'deep_arrays.json':
@@ -293,7 +295,7 @@ class StressTest(unittest.TestCase):
                 try:
                     obj = yajl.load(f)
                 except ValueError as e:
-                    print('\t%s: %s' % (case, e))
+                    print('\t%s:\n%s' % (case, e))
                 else:
                     try:
                         j = yajl.dumps(obj)

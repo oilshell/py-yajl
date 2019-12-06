@@ -247,16 +247,12 @@ PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen
     yajl_status yrc;
     yrc = yajl_parse(parser, (const unsigned char *)(buffer), buflen);
     if (yrc != yajl_status_ok) {
-        //fprintf(stderr, "YAJL ERROR %s\n", yajl_status_to_string(yrc));
-        PyErr_SetString(PyExc_ValueError, yajl_status_to_string(yrc));
-        return NULL;
+        goto error;
     }
 
     yrc = yajl_complete_parse(parser);
     if (yrc != yajl_status_ok) {
-        //fprintf(stderr, "YAJL ERROR %s\n", yajl_status_to_string(yrc));
-        PyErr_SetString(PyExc_ValueError, yajl_status_to_string(yrc));
-        return NULL;
+        goto error;
     }
 
     yajl_free(parser);
@@ -268,4 +264,17 @@ PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen
     PyObject *root = self->root;
     self->root = NULL;
     return root;
+
+    unsigned char* str;
+error:
+    // TODO: It would be nice to make these parse errors more consistent with
+    // Oil.  And maybe return them rather than printing on stderr.
+    str = yajl_get_error(parser, 1, buffer, buflen);
+    fprintf(stderr, "%s", (const char *) str); 
+    yajl_free_error(parser, str);  
+    yajl_free(parser);
+
+    //fprintf(stderr, "YAJL ERROR %s\n", yajl_status_to_string(yrc));
+    PyErr_SetString(PyExc_ValueError, yajl_status_to_string(yrc));
+    return NULL;
 }
