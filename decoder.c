@@ -232,9 +232,6 @@ static yajl_callbacks decode_callbacks = {
 
 PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen)
 {
-    yajl_handle parser = NULL;
-    yajl_status yrc;
-
     if (self->elements.used > 0) {
         py_yajl_ps_free(self->elements);
         py_yajl_ps_init(self->elements);
@@ -245,22 +242,26 @@ PyObject *_internal_decode(_YajlDecoder *self, char *buffer, unsigned int buflen
     }
 
     /* callbacks, config, allocfuncs */
-    parser = yajl_alloc(&decode_callbacks, NULL, (void *)(self));
-    yrc = yajl_parse(parser, (const unsigned char *)(buffer), buflen);
-    yajl_complete_parse(parser);
-    yajl_free(parser);
+    yajl_handle parser = yajl_alloc(&decode_callbacks, NULL, (void *)(self));
 
+    yajl_status yrc;
+    yrc = yajl_parse(parser, (const unsigned char *)(buffer), buflen);
     if (yrc != yajl_status_ok) {
-        //fprintf(stderr, "YAJL ERROR %d\n", yrc);
-        //fprintf(stderr, "%s\n", yajl_status_to_string(yrc));
+        //fprintf(stderr, "YAJL ERROR %s\n", yajl_status_to_string(yrc));
         PyErr_SetString(PyExc_ValueError, yajl_status_to_string(yrc));
         return NULL;
     }
 
-    if (self->root == NULL) {
-        PyErr_SetString(PyExc_ValueError, "The root object is NULL");
+    yrc = yajl_complete_parse(parser);
+    if (yrc != yajl_status_ok) {
+        //fprintf(stderr, "YAJL ERROR %s\n", yajl_status_to_string(yrc));
+        PyErr_SetString(PyExc_ValueError, yajl_status_to_string(yrc));
         return NULL;
     }
+
+    yajl_free(parser);
+
+    assert(self->root != NULL);
 
     // Callee now owns memory, we'll leave refcnt at one and
     // null out our pointer.
