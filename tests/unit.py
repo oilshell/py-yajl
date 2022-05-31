@@ -59,9 +59,10 @@ class EncoderBase(unittest.TestCase):
     def encode(self, value):
         return yajl.dumps(value)
 
-    def assertEncodesTo(self, value, json):
-        rc = self.encode(value)
-        assert rc == json, ('Failed to encode JSON correctly', locals())
+    def assertEncodesTo(self, value, expected):
+        actual = self.encode(value)
+        #assert rc == json, ('Failed to encode JSON correctly', locals())
+        self.assertEquals(expected, actual)
         return True
 
 class BasicJSONEncodeTests(EncoderBase):
@@ -79,6 +80,23 @@ class BasicJSONEncodeTests(EncoderBase):
 
     def test_Dict(self):
         self.assertEncodesTo({'key' : 'value'}, '{"key":"value"}')
+
+    def test_OrderedDict(self):
+        # Oil patch
+        from collections import OrderedDict
+
+        d = OrderedDict([('z', 1), ('y', 2), ('x', 3)])
+        d['a'] = 42
+        d['z'] = 50
+        print(yajl.dumps(d))
+
+        self.assertEncodesTo(d, '{"z":50,"y":2,"x":3,"a":42}')
+
+        # Nested ordered dict
+
+        d["order"] = OrderedDict([('spam', None), ('eggs', None), ('ham', None)])
+        self.assertEncodesTo(d,
+            '{"z":50,"y":2,"x":3,"a":42,"order":{"spam":null,"eggs":null,"ham":null}}')
 
     # Python 3 version
     #def test_UnicodeDict(self):

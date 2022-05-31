@@ -116,11 +116,18 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
     }
     if (PyDict_Check(object)) {
         PyObject *key, *value;
-        Py_ssize_t position = 0;
 
         status = yajl_gen_map_open(handle);
         if (status == yajl_max_depth_exceeded) goto exit;
-        while (PyDict_Next(object, &position, &key, &value)) {
+
+        /* Oil patch: use PyObject_GetIter instead of PyDict_Next to respect
+         * __iter__ in OrderedDict.  This is also more consistent: the 'list'
+         * case above already uses PyIter_Next!
+         * */
+        iterator = PyObject_GetIter(object);
+        if (iterator == NULL)
+            goto exit;
+        while (key = PyIter_Next(iterator)) {
             PyObject *newKey = key;
 
             if (!PyString_Check(key)) {
@@ -130,13 +137,17 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
             }
 
             status = ProcessObject(self, newKey);
+            /* Oil note: This seems like it's never executed? */
             if (key != newKey) {
                 Py_XDECREF(newKey);
             }
             if (status == yajl_gen_in_error_state) return status;
             if (status == yajl_max_depth_exceeded) goto exit;
 
+            value = PyDict_GetItem(object, key);
             status = ProcessObject(self, value);
+            /* Py_XDECREF(value); */
+
             if (status == yajl_gen_in_error_state) return status;
             if (status == yajl_max_depth_exceeded) goto exit;
         }
