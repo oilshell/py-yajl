@@ -154,7 +154,8 @@ static yajl_gen_status ProcessObject(_YajlEncoder *self, PyObject *object)
         return yajl_gen_map_close(handle);
     }
     else {
-        PyErr_SetString(PyExc_TypeError, "Unexpected type of object");
+        PyErr_Format(PyExc_TypeError,
+            "Can't serialize type %.200s to JSON", object->ob_type->tp_name);
         goto exit;
     }
 

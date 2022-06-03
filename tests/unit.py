@@ -147,13 +147,6 @@ class StreamBlockingDecodingTests(unittest.TestCase):
         self.assertEquals(obj, {'foo' : ['one', 'two', ['three', 'four']]})
 
 
-class StreamEncodingTests(unittest.TestCase):
-    def test_blocking_encode(self):
-        obj = {'foo' : ['one', 'two', ['three', 'four']]}
-        stream = StringIO()
-        buffer = yajl.dump(obj, stream)
-        self.assertEquals(stream.getvalue(), '{"foo":["one","two",["three","four"]]}')
-
 class DumpsOptionsTests(unittest.TestCase):
     def test_indent_four(self):
         rc = yajl.dumps({'foo' : 'bar'}, indent=4)
@@ -173,28 +166,6 @@ class DumpsOptionsTests(unittest.TestCase):
         rc = yajl.dumps({'foo' : 'bar'}, indent=-1)
         self.assertEquals(rc, '{"foo":"bar"}')
 
-class DumpOptionsTests(unittest.TestCase):
-    stream = None
-    def setUp(self):
-        self.stream = StringIO()
-
-    def test_indent_four(self):
-        rc = yajl.dump({'foo' : 'bar'}, self.stream, indent=4)
-        expected = '{\n    "foo": "bar"\n}\n'
-        self.assertEquals(self.stream.getvalue(), expected)
-
-    def test_indent_zero(self):
-        rc = yajl.dump({'foo' : 'bar'}, self.stream, indent=0)
-        expected = '{\n"foo": "bar"\n}\n'
-        self.assertEquals(self.stream.getvalue(), expected)
-
-    def test_indent_str(self):
-        self.failUnlessRaises(TypeError, yajl.dump, {'foo' : 'bar'}, self.stream, indent='4')
-
-    def test_negative_indent(self):
-        ''' Negative `indent` should not result in pretty printing '''
-        rc = yajl.dump({'foo' : 'bar'}, self.stream, indent=-1)
-        self.assertEquals(self.stream.getvalue(), '{"foo":"bar"}')
 
 class IssueSevenTest(unittest.TestCase):
 
