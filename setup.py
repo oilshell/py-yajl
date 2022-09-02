@@ -15,7 +15,9 @@ version = '0.3.6'
 if os.path.exists('.git'):
     try:
         commit = subprocess.Popen(['git', 'log', '--max-count=1', '--format=%h'], stdout=subprocess.PIPE).communicate()[0]
-        version = '%s-%s' % (version, commit.strip())
+        # OIL PATCH
+        # use + instead of - to remove setuptools warning about PEP 440 version identifiers
+        version = '%s+%s' % (version, commit.strip())
     except:
         pass
 
