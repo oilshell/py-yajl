@@ -94,7 +94,7 @@ static int handle_bool(void *ctx, int value)
     return PlaceObject(ctx, PyBool_FromLong((long)(value)));
 }
 
-static int handle_number(void *ctx, const char *value, unsigned int length)
+static int handle_number(void *ctx, const char *value, size_t length)
 {
     //fprintf(stderr, "handle_number: ");
     //fwrite(value, length, 1, stderr);
@@ -127,7 +127,7 @@ static int handle_number(void *ctx, const char *value, unsigned int length)
     return status;
 }
 
-static int handle_string(void *ctx, const unsigned char *value, unsigned int length)
+static int handle_string(void *ctx, const unsigned char *value, size_t length)
 {
     return PlaceObject(ctx, PyString_FromStringAndSize((char *)value, length));
 }
@@ -142,7 +142,7 @@ static int handle_start_dict(void *ctx)
     return success;
 }
 
-static int handle_dict_key(void *ctx, const unsigned char *value, unsigned int length)
+static int handle_dict_key(void *ctx, const unsigned char *value, size_t length)
 {
     PyObject *object = PyString_FromStringAndSize((const char *) value, length);
 
