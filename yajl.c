@@ -84,7 +84,7 @@ static PyObject *py_loads(PYARGS)
     return result;
 }
 
-const char* IndentString(int n) {
+char* IndentString(int n) {
     char* spaces = (char *)(malloc(n + 1));
     memset(spaces, ' ', n);
     spaces[n] = '\0';
@@ -161,7 +161,7 @@ static PyObject *py_load(PYARGS)
 }
 
 static struct PyMethodDef yajl_methods[] = {
-    {"dumps", (PyCFunctionWithKeywords)(py_dumps), METH_VARARGS | METH_KEYWORDS,
+    {"dumps", (PyCFunction)(py_dumps), METH_VARARGS | METH_KEYWORDS,
 "yajl.dumps(obj [, indent=None])\n\n\
 Returns an encoded JSON string of the specified `obj`\n\
 \n\
@@ -196,5 +196,6 @@ json.dumps():\t\t7760.6348ms\n\
 simplejson.dumps():\t930.9748ms\n\
 yajl.dumps():\t\t681.0221ms"
 );
+    (void)module;
 }
 
